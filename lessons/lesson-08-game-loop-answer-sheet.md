@@ -57,11 +57,11 @@ export function useAnimationFrame(
   const frameIdRef = useRef<number>(0);
 
   // Keep the callback ref up to date on every render.
-  // This runs synchronously during render (before effects),
-  // ensuring the ref is current before the next frame fires.
-  useEffect(() => {
-    callbackRef.current = callback;
-  });
+  // We assign directly during render (not inside an effect) so the ref
+  // is current synchronously — before any useEffect or rAF fires.
+  // This eliminates the one-paint lag that a useEffect assignment can cause
+  // and avoids a no-dependency useEffect that confuses linters.
+  callbackRef.current = callback;
 
   // The main animation loop effect.
   // Dependencies: [isActive] — restarts the loop when activation changes.

@@ -178,9 +178,11 @@ export function useWebcam(): UseWebcamResult {
         videoRef.current.srcObject = null;
       }
 
-      // Reset state for remount (Strict Mode scenario).
-      setIsReady(false);
-      setError(null);
+      // NOTE: We intentionally do NOT call setIsReady(false) or setError(null)
+      // here. Setting state during cleanup (which runs on unmount, including
+      // Strict Mode's mount→unmount cycle) can trigger "state update on an
+      // unmounted component" warnings. On remount, the fresh useState calls
+      // reinitialize the state automatically, so resetting here is unnecessary.
     };
   }, []); // Empty dependency array: run once on mount, clean up on unmount.
 

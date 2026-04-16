@@ -107,9 +107,12 @@ interface UseMotionDetectionReturn {
  *   - At 60fps: ~553K comparisons/second — negligible CPU cost.
  *
  * @param videoRef - Ref to the <video> element (source of camera frames).
+ * @param isActive - When false, detection is short-circuited and the stored
+ *   previous frame is cleared so stale data doesn't persist across pauses.
  */
 export function useMotionDetection(
   videoRef: React.RefObject<HTMLVideoElement | null>,
+  isActive: boolean = true,
 ): UseMotionDetectionReturn {
   // Offscreen canvas — created once, reused every frame.
   // This canvas exists purely in JavaScript; it's never added to the DOM.
@@ -154,6 +157,15 @@ export function useMotionDetection(
    * @returns MotionDetectionResult with regions and overall motion score.
    */
   const detectMotion = useCallback((): MotionDetectionResult => {
+    // Short-circuit when inactive: skip all detection work and clear the
+    // stored previous frame. Clearing is important — when the hook reactivates,
+    // we want a fresh comparison rather than diffing against a stale frame
+    // captured before the pause (which would cause a single spurious motion spike).
+    if (!isActive) {
+      previousFrameRef.current = null;
+      return { regions: [], overallMotion: 0 };
+    }
+
     const video = videoRef.current;
     const ctx = getOffscreenContext();
 
@@ -287,7 +299,7 @@ export function useMotionDetection(
           ? Math.min(totalMotionPixels / totalPixels, 1)
           : 0,
     };
-  }, [videoRef]);
+  }, [videoRef, isActive]);
 
   return { detectMotion };
 }

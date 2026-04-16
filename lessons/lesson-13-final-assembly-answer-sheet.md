@@ -13,7 +13,7 @@ import { DirtLayer, DIRT_WIN_THRESHOLD } from "../game/DirtLayer";
 import { ParticleSystem } from "../game/ParticleSystem";
 import type { GameState } from "../game/gameState";
 import { transition } from "../game/gameState";
-import type { MotionRegion } from "../types/motion";
+
 import {
   MIN_CLEAN_RADIUS,
   MAX_CLEAN_RADIUS,
@@ -194,14 +194,20 @@ export function WindowCleanerGame(): React.JSX.Element {
 
       // 3g: Check win condition
       if (dirtRemainingRef.current < DIRT_WIN_THRESHOLD) {
+        // Immediately update the ref so that the NEXT rAF tick sees "won"
+        // and doesn't re-trigger this branch. setGameState only schedules a
+        // React re-render; the ref is what the frame loop reads.
+        const next = transition(state, "won");
+        gameStateRef.current = next;
+
         // Emit celebration bubbles
         particleSystemRef.current.emitCelebration(
           CANVAS_WIDTH,
           CANVAS_HEIGHT,
           WIN_BUBBLE_COUNT,
         );
-        // Transition to won state
-        const next = transition(state, "won");
+
+        // Schedule a React re-render to reflect the state change in the UI
         setGameState(next);
       }
     } else if (state === "won") {
@@ -345,7 +351,7 @@ function drawReadyScreen(ctx: CanvasRenderingContext2D): void {
     CANVAS_HEIGHT / 2 + 38,
   );
 
-  // Start prompt (pulsing opacity effect via frame count)
+  // Start prompt
   ctx.fillStyle = "#38bdf8";
   ctx.font = "bold 24px sans-serif";
   ctx.fillText("▶ Click to Start", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 90);
