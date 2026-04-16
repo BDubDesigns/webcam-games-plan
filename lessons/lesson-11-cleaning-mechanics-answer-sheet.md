@@ -276,13 +276,7 @@ function drawPlaceholder(ctx: CanvasRenderingContext2D): void {
   ctx.textAlign = "start";
   ctx.textBaseline = "alphabetic";
 }
-
-const CANVAS_WIDTH_FOR_HUD = 640; // Used by drawProgressHUD closure
 ```
-
-Wait — there's a scoping issue. Let me clean that up. The `CANVAS_WIDTH` constant is available in the module scope, so `drawProgressHUD` can access it directly. Remove the `CANVAS_WIDTH_FOR_HUD` line. The code above uses the module-level `CANVAS_WIDTH` constant correctly in `drawProgressHUD`.
-
-**Delete the last line** (`const CANVAS_WIDTH_FOR_HUD = 640;`) — it was an error. The helper functions access `CANVAS_WIDTH` from the module scope.
 
 ---
 
