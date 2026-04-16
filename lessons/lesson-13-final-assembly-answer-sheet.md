@@ -296,8 +296,14 @@ export function WindowCleanerGame(): React.JSX.Element {
         </span>
       </div>
 
-      {/* Hidden video element — data source for canvas drawing */}
-      <video ref={videoRef} autoPlay playsInline muted hidden />
+      {/* Keep video mounted for canvas/motion processing; visually hide it off-screen instead of using `hidden` */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="absolute -left-[9999px] top-auto h-0 w-0 overflow-hidden opacity-0 pointer-events-none"
+      />
     </div>
   );
 }
