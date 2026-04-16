@@ -61,10 +61,10 @@ const WIN_BUBBLE_COUNT = 100;
 export function WindowCleanerGame(): React.JSX.Element {
   // --- Hooks ---
   const { videoRef, isReady, error } = useWebcam();
-  const { detectMotion } = useMotionDetection(videoRef);
 
   // --- State ---
   const [gameState, setGameState] = useState<GameState>("ready");
+  const { detectMotion } = useMotionDetection(videoRef, gameState === "playing");
 
   // --- Refs (no re-renders needed for these) ---
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
